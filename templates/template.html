@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SimpleReader Verwaltung</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <header>
+      <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+          <a class="brand" href="/admin">SimpleReader Verwaltung</a>
+          <ul class="nav">
+            <li class="active"><a href="/admin/pubs">Publikationen</a></li>
+            <li><a href="/admin/devices">Geräte</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    <br/>
+    <div class="container">
+      {% for message in get_flashed_messages() %}
+      <div class=flash>{{ message }}</div>
+      <br \>
+      {% endfor %}
+      {% block content %}
+      {% endblock %}
+    </div>
+  </body>
+</html>
+

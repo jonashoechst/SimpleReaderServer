@@ -1,0 +1,22 @@
+{% extends "template.html" %}
+{% block content %}
+  <div class="jumbo">
+  <h2>Neue Publikation anlegen</h2>
+  <form action="" method=post enctype="multipart/form-data">
+    <dl>
+      <dt>Name:
+      <dd><input type=text name=title>
+      <dt>Kurzbeschreibung:
+      <dd><textarea cols="200" rows="10" name=shortDescription></textarea>
+      <dt>Kategorie:
+      <dd><input type=text name=category>
+      <dt>PDF Datei:
+      <dd><input type="file" name="pdf">
+      <dt>Vorschau Datei:
+      <dd><input type="file" name="preview">
+      </dd>
+    </dl>
+    <p><input type=button onclick="history.back();" value="Zurück"> <input type=submit value="Veröffentlichen"> 
+  </form>
+</div>
+{% endblock %}

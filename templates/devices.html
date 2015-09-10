@@ -1,0 +1,26 @@
+{% extends "template.html" %}
+{% block content %}
+  <div class="jumbo">
+    <h2>Publikationen</h2>
+    <br/>
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in devices %}
+          <tr>
+            <td><a href="/admin/edit_device/{{ d.uid }}"><img src="/static/device_status/{{ d.status }}.png"> - {{ d.status }}</a></td>
+            <td>{{ d.name }}</td>
+            <td>{{ d.email }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    <table >
+	</div>
+{% endblock %}

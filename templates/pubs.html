@@ -1,0 +1,42 @@
+{% extends "template.html" %}
+{% block content %}
+  <div class="jumbo">
+    <h2>Publikationen</h2>
+    <h5><a href="/admin/new_pub">Neue Publikation anlegen</a></h5>
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Bearbeiten</th>
+            <th>Vorschau</th>
+            <th>Titel</th>
+            <th>Veröffentlichung</th>
+            <th>Dateigröße</th>
+            <th>Kategorie</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pubs %}
+          <tr>
+            <td>
+              <form id="actions_{{ p.uid }}" method="post">
+                <input type="hidden" name="uid" value="{{ p.uid }}" />
+                <input type="image" name="edit" src="/static/edit.png" />
+                <input type="image" name="delete" src="/static/bin.png" onclick="return confirm('Bist du sicher, dass du {{ p.title }} löschen möchtest?');" />
+                <input type="image" name="download" src="/static/download.png" />
+              </form>
+                <!-- <a href="/admin/edit_pub/{{ p.uid }}"><img src="/static/edit.png"></a>
+                <input type="image" name="your_image_name" src="your_image_url.png" />
+              <a href="/admin/edit_pub/{{ p.uid }}"><img src="/static/bin.png"></a> -->
+            </td>
+            <td><img src="{{ p.previewUrl }}" width="150px"></td>
+            <td>{{ p.title }}</td>
+            <td>{{ p.releaseDate }}</td>
+            <td>{{ p.filesize }}</td>
+            <td>{{ p.category }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    <table >
+	</div>
+{% endblock %}

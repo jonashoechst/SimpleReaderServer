@@ -1,0 +1,29 @@
+{% extends "template.html" %}
+{% block content %}
+  <div class="jumbo">
+  <h2>Publikation bearbeiten</h2>
+  <form action="" method=post>
+    <dl>
+      <input type=hidden name=uid value="{{ pub.uid }}">
+      <dt>UID: {{ pub.uid }}<br \><br \>
+      <dd><img src="{{ pub.previewUrl }}" width="220px"><br \><br \>
+      <dt>Name:
+      <dd><input type=text name=title value="{{ pub.title }}">
+      <dt>Kurzbeschreibung:
+      <dd><textarea cols="200" rows="10" name=shortDescription>{{ pub.shortDescription }}</textarea>
+      <dt>Vorschau Url:
+      <dd><input type=text name=previewUrl value="{{ pub.previewUrl }}">
+      <dt>PDF Url:
+      <dd><input type=text name=pdfUrl value="{{ pub.pdfUrl }}">
+      <dt>Veröffentlichungsdatum:
+      <dd><input type=text name=releaseDate value="{{ pub.releaseDate }}">
+      <dt>Dateigröße:
+      <dd><input type=text name=filesize value="{{ pub.filesize }}">
+      <dt>Kategorie:
+      <dd><input type=text name=category value="{{ pub.category }}">
+      </dd>
+    </dl>
+    <p><input type=button onclick="history.back();" value="Zurück"> <input type=submit value="Speichern"> 
+  </form>
+</div>
+{% endblock %}
