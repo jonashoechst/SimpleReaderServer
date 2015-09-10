@@ -6,7 +6,7 @@
     <table class="table table-striped">
         <thead>
           <tr>
-            <th>Bearbeiten</th>
+            <th>Aktionen</th>
             <th>Vorschau</th>
             <th>Titel</th>
             <th>Veröffentlichung</th>
@@ -21,7 +21,7 @@
               <form id="actions_{{ p.uid }}" method="post">
                 <input type="hidden" name="uid" value="{{ p.uid }}" />
                 <input type="image" name="edit" src="/static/edit.png" />
-                <input type="image" name="delete" src="/static/bin.png" onclick="return confirm('Bist du sicher, dass du {{ p.title }} löschen möchtest?');" />
+                <input type="image" name="delete" src="/static/bin.png" onclick="return confirm('Bist du sicher, dass du \'\'{{ p.title }}\'\' löschen möchtest?');" />
                 <input type="image" name="download" src="/static/download.png" />
               </form>
                 <!-- <a href="/admin/edit_pub/{{ p.uid }}"><img src="/static/edit.png"></a>

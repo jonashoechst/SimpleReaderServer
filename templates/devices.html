@@ -1,11 +1,12 @@
 {% extends "template.html" %}
 {% block content %}
   <div class="jumbo">
-    <h2>Publikationen</h2>
+    <h2>Registrierte Geräte</h2>
     <br/>
     <table class="table table-striped">
         <thead>
           <tr>
+            <th>Aktionen</th>
             <th>Status</th>
             <th>Name</th>
             <th>Email</th>
@@ -14,9 +15,23 @@
         <tbody>
           {% for d in devices %}
           <tr>
-            <td><a href="/admin/edit_device/{{ d.uid }}"><img src="/static/device_status/{{ d.status }}.png"> - {{ d.status }}</a></td>
+            <td>
+              <form id="actions_{{ d.uid }}" method="post">
+                <input type="hidden" name="uid" value="{{ d.uid }}" />
+                
+                <input type="image" name="delete" src="/static/bin.png" onclick="return confirm('Bist du sicher, dass du \'\'{{ d.name }}\'\' löschen möchtest?');"  />
+                
+                <input type="image" name="message" src="/static/message.png" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), 'Push-Nachricht an {{ d.name }}:');"  />
+
+                <input type="image" name="green" src="/static/device_status/green.png" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), '{{ d.name }} wirklich Grün einstufen?\n\nPush-Nachricht zur Erklärung:');"  />
+                <input type="image" name="yellow" src="/static/device_status/yellow.png" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), '{{ d.name }} wirklich Gelb einstufen?\n\nPush-Nachricht zur Begründung:');"  />
+                <input type="image" name="red" src="/static/device_status/red.png" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), '{{ d.name }} wirklich Rot einstufen?\n\nPush-Nachricht zur Begründung:');"  />
+                
+              </form>
+            </td>
+            <td><img src="/static/device_status/{{ d.status }}.png"></td>
             <td>{{ d.name }}</td>
-            <td>{{ d.email }}</td>
+            <td><a href="mailto:{{ d.email }}">{{ d.email }}</a></td>
           </tr>
           {% endfor %}
         </tbody>

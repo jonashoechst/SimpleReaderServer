@@ -62,6 +62,50 @@ def login_required(test):
             return redirect(url_for("login"))
     return wrap    
 
+            
+@app.route("/admin/devices", methods=["GET", "POST"])
+@login_required
+def devices():
+    if request.method == "GET":
+        return render_template("devices.html", devices=Device.query.all())
+    else:
+        if "message.x" in request.form:
+            dev = Device.query.filter_by(uid=request.form["uid"]).first()
+            return "Nachricht an "+dev.name+": "+request.form["message_content"];
+        elif "delete.x" in request.form:
+            Device.query.filter_by(uid=request.form["uid"]).delete();
+
+            flash(u"Gerät ("+request.form['uid']+u") wurde erfolgreich gelöscht.")
+            return redirect(url_for("devices"))
+        elif "green.x" in request.form:
+            dev = Device.query.filter_by(uid=request.form["uid"]).first()
+            dev.status = "green";
+            
+            flash(u"Gerät \""+dev.name+u"\" ist jetzt Grün eingestuft... Begründung: "+request.form["message_content"])
+            return redirect(url_for("devices"))
+            
+        elif "yellow.x" in request.form:
+            dev = Device.query.filter_by(uid=request.form["uid"]).first()
+            dev.status = "yellow";
+            
+            flash(u"Gerät \""+dev.name+u"\" ist jetzt Gelb eingestuft... Begründung: "+request.form["message_content"])
+            return redirect(url_for("devices"))
+            
+        elif "red.x" in request.form:
+            dev = Device.query.filter_by(uid=request.form["uid"]).first()
+            dev.status = "red";
+            
+            flash(u"Gerät \""+dev.name+u"\" ist jetzt Rot eingestuft... Begründung: "+request.form["message_content"])
+            return redirect(url_for("devices"))
+            
+
+@app.route("/admin/edit_device/<device_uid>")
+@login_required
+def edit_device(device_uid):
+    return render_template("edit_device.html", device=Device.query.filter_by(uid=device_uid).first())
+    
+
+
 @app.route("/admin/pubs", methods=["GET", "POST"])
 @login_required
 def pubs():
@@ -73,25 +117,16 @@ def pubs():
             return redirect(url_for("edit_pub", pub_uid=request.form["uid"]))
         elif "delete.x" in request.form:
             Publication.query.filter_by(uid=request.form['uid']).delete()
-            # db.session.commit()
             
+            flash(u"Publikation ("+request.form['uid']+u") wurde erfolgreich gelöscht.")
             return redirect(url_for("pubs"))
         elif "download.x" in request.form:
             pub = Publication.query.filter_by(uid=request.form['uid']).first()
             return redirect(pub.pdfUrl)
         else:
             return "Function not implemented."
+         
             
-@app.route("/admin/devices")
-@login_required
-def devices():
-    return render_template("devices.html", devices=Device.query.all())
-
-@app.route("/admin/edit_device/<device_uid>")
-@login_required
-def edit_device(device_uid):
-    return render_template("edit_device.html", device=Device.query.filter_by(uid=device_uid).first())
-    
 @app.route("/admin/edit_pub/<pub_uid>", methods=["GET", "POST"])
 @login_required
 def edit_pub(pub_uid):
