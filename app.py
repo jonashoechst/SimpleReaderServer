@@ -18,6 +18,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
 
+from model import * 
+
 # Build a sample db on the fly, if one does not exist yet.
 app_dir = os.path.realpath(os.path.dirname(__file__))
     
@@ -28,9 +30,6 @@ if not os.path.exists(database_path):
 upload_path = os.path.join(app_dir, app.config['UPLOAD_FOLDER'])
 if not os.path.exists(upload_path):
     os.makedirs(upload_path)
-
-
-from model import * 
 
 @app.route("/admin")
 @app.route("/admin/")
