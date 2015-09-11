@@ -18,6 +18,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
 
+# Build a sample db on the fly, if one does not exist yet.
+app_dir = os.path.realpath(os.path.dirname(__file__))
+    
+database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
+if not os.path.exists(database_path):
+    build_sample_db()
+
+upload_path = os.path.join(app_dir, app.config['UPLOAD_FOLDER'])
+if not os.path.exists(upload_path):
+    os.makedirs(upload_path)
+
+
 from model import * 
 
 @app.route("/admin")
@@ -209,16 +221,6 @@ def register():
     return json.dumps({"status":device.status})
 
 if __name__ == '__main__':
-    # Build a sample db on the fly, if one does not exist yet.
-    app_dir = os.path.realpath(os.path.dirname(__file__))
-    
-    database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
-    if not os.path.exists(database_path):
-        build_sample_db()
-        
-    upload_path = os.path.join(app_dir, app.config['UPLOAD_FOLDER'])
-    if not os.path.exists(upload_path):
-        os.makedirs(upload_path)
 
     # Start app
     app.run(debug=True, port=PORT)
