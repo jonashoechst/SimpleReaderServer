@@ -30,7 +30,7 @@
               </form>
             </td>
             <td><img src="{{ url_for('static', filename='device_status/'+d.status+'.png') }}"></td>
-            <td>{{ d.name }}</td>
+            <td>{{ d.name }}<br \>({{ d.uid }})</td>
             <td><a href="mailto:{{ d.email }}">{{ d.email }}</a></td>
           </tr>
           {% endfor %}
