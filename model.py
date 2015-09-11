@@ -56,6 +56,7 @@ class Admin(db.Model):
 def build_sample_db():
     db.drop_all()
     db.create_all()
+    db.session.begin()
     
     pub = Publication()
     pub.title = u"Sonneblättche"
