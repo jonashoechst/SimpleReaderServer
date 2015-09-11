@@ -30,12 +30,28 @@ if not os.path.exists(database_path):
 upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
 if not os.path.exists(upload_path):
     os.makedirs(upload_path)
+    
+#
+# Login decorator
+def login_required(test):
+    @wraps(test)
+    def wrap(*args, **kwargs):
+        if "logged_in" in session:
+            return test(*args, **kwargs)
+        else:
+            flash("Login erforderlich!")
+            return redirect(url_for("login"))
+    return wrap
+   
 
+#
+# Login decorator
 @app.route("/admin")
-@app.route("/admin/")
 def home():
     return redirect (url_for("pubs"))
     
+#
+# Admin Login
 @app.route("/admin/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -55,22 +71,15 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
         
+#
+# Admin Logout
 @app.route("/admin/logout")
 def logout():
     session.pop("logged_in", None)
     return redirect (url_for("home"))
-    
-def login_required(test):
-    @wraps(test)
-    def wrap(*args, **kwargs):
-        if "logged_in" in session:
-            return test(*args, **kwargs)
-        else:
-            flash("Login erforderlich!")
-            return redirect(url_for("login"))
-    return wrap    
-
-            
+              
+#
+# Administrate Devices
 @app.route("/admin/devices", methods=["GET", "POST"])
 @login_required
 def devices():
@@ -111,6 +120,8 @@ def devices():
             return redirect(url_for("devices"))
             
 
+#
+# Administrate Publications
 @app.route("/admin/pubs", methods=["GET", "POST"])
 @login_required
 def pubs():
@@ -132,6 +143,8 @@ def pubs():
             return "Function not implemented."
          
             
+#
+# Edit single Publication
 @app.route("/admin/edit_pub/<pub_uid>", methods=["GET", "POST"])
 @login_required
 def edit_pub(pub_uid):
@@ -139,6 +152,8 @@ def edit_pub(pub_uid):
         return render_template("edit_pub.html", pub=Publication.query.filter_by(uid=pub_uid).first())
     else:
         pub = Publication.query.filter_by(uid=request.form['uid']).first()
+        
+        db.session.begin()
         pub.title = request.form['title']
         pub.shortDescription = request.form['shortDescription']
         pub.previewUrl = request.form['previewUrl']
@@ -146,13 +161,14 @@ def edit_pub(pub_uid):
         pub.releaseDate = request.form['releaseDate']
         pub.filesize = request.form['filesize']
         pub.category = request.form['category']
-        
-        # db.session.commit()
+        db.session.commit()
         
         flash(pub.title+" wurde gespeichert.")
         return redirect(url_for("pubs"))
         
     
+#
+# To create a new Publication
 @app.route("/admin/new_pub", methods=["GET", "POST"])
 @login_required
 def new_pub():
@@ -191,6 +207,8 @@ def new_pub():
     
     
 
+#
+# API Feed Method
 @app.route("/api/feed", methods=["POST"])
 def feed():
     pubs = Publication.query.order_by(Publication.releaseDate.desc()).all()
@@ -211,6 +229,8 @@ def feed():
         return json.dumps(return_dict)
     
 
+#
+# API Register Method
 @app.route("/api/register", methods=["POST"])
 def register():
     device = Device.query.filter_by(uid=request.form["uid"]).first()
