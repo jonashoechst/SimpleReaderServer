@@ -209,14 +209,15 @@ def register():
     device = Device.query.filter_by(uid=request.form["uid"]).first()
     if device == None:
         device = Device()
-        device.name = request.form["name"]
         device.uid = request.form["uid"]
-        device.email = request.form["email"]
         device.status = "new"
         
-        db.session.begin()
-        db.session.add(device)
-        db.session.commit()
+    device.name = request.form["name"]
+    device.email = request.form["email"]
+        
+    db.session.begin()
+    db.session.add(device)
+    db.session.commit()
         
     return json.dumps({"status":device.status})
 

@@ -21,7 +21,7 @@
                 
                 <input type="image" name="delete" src="{{ url_for('static', filename='bin.png') }}" onclick="return confirm('Bist du sicher, dass du \'\'{{ d.name }}\'\' löschen möchtest?');"  />
                 
-                <input type="image" name="message" src="/static/message.png" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), 'Push-Nachricht an {{ d.name }}:');"  />
+                <input type="image" name="message" src="{{ url_for('static', filename='message.png') }}" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), 'Push-Nachricht an {{ d.name }}:');"  />
 
                 <input type="image" name="green" src="{{ url_for('static', filename='device_status/green.png') }}" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), '{{ d.name }} wirklich Grün einstufen?\n\nPush-Nachricht zur Erklärung:');"  />
                 <input type="image" name="yellow" src="{{ url_for('static', filename='device_status/yellow.png') }}" onclick="return sendMessage(document.getElementById('actions_{{ d.uid }}'), '{{ d.name }} wirklich Gelb einstufen?\n\nPush-Nachricht zur Begründung:');"  />
