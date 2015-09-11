@@ -11,7 +11,7 @@ from model import *
 PORT = 59243
 
 # Create Flask application
-app = Flask(__name__, port=PORT)
+app = Flask(__name__)
 app.secret_key = "0123456789"
 
 
@@ -226,5 +226,5 @@ if __name__ == '__main__':
         os.makedirs(upload_path)
 
     # Start app
-    app.run(debug=True)
+    app.run(debug=True, port=PORT)
 
