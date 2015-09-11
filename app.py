@@ -4,11 +4,15 @@ import os, datetime, glob
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import *
+from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
+# Static Definitions
 PORT = 5000
+SIMPLE_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+app_dir = os.path.realpath(os.path.dirname(__file__))
 
-# Create Flask application
+# create Application
 app = Flask(__name__)
 app.secret_key = "0123456789"
 app.config['UPLOAD_FOLDER'] = "uploads/"
@@ -17,20 +21,83 @@ app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
-
-from model import * 
-
-# Build a sample db on the fly, if one does not exist yet.
-app_dir = os.path.realpath(os.path.dirname(__file__))
+   
+# model definitions
+class Device(db.Model):
+    uid = db.Column(db.Text(36), primary_key=True)
+    email = db.Column(db.Text(120))
+    name = db.Column(db.Text(64))
+    status = db.Column(db.Text(10))
+    apns_token = db.Column(db.Text(64))
     
-database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
-if not os.path.exists(database_path):
-    build_sample_db()
-
-upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
-if not os.path.exists(upload_path):
-    os.makedirs(upload_path)
+    def __unicode__(self):
+        return self.uid+"("+self.name+")"
+        
+class Publication(db.Model):
+    uid = db.Column(db.String(120), primary_key=True)
+    title = db.Column(db.Text(120))
+    shortDescription = db.Column(db.Text(2000))
+    previewUrl = db.Column(db.String(200))
+    pdfUrl = db.Column(db.String(200))
+    releaseDate = db.Column(db.String(25))
+    filesize = db.Column(db.String(25))
+    category = db.Column(db.Text(25))
     
+    def generateUid(self):
+        if self.uid != None:
+            return self.uid
+            
+        new_uid = "".join([c for c in self.title if c in SIMPLE_CHARS]).encode("utf-8").lower()
+        # filter(lambda x: x in SIMPLE_CHARS, self.title).encode("utf-8")
+        num = 0
+        
+        other_pub = Publication.query.filter_by(uid=new_uid+str(num)).first()
+        while(other_pub != None):
+            num = num + 1
+            other_pub = Publication.query.filter_by(uid=new_uid+str(num)).first()
+            
+        self.uid = new_uid+str(num)
+        
+        return self.uid
+    
+    def __unicode__(self):
+        return "Publication: "+self.uid+"("+self.title+")"
+    
+class Admin(db.Model):
+    username = db.Column(db.Text(64), primary_key=True)
+    name = db.Column(db.Text(64))
+    email = db.Column(db.Text(120))
+    pw_digest = db.Column(db.Text(64))
+    
+    def check_password(self, password):
+        return check_password_hash(self.pw_digest, password)
+
+def build_sample_db():
+    # db.drop_all()
+    db.create_all()
+    db.session.begin()
+    
+    pub = Publication()
+    pub.title = u"Sonneblättche"
+    pub.generateUid()
+    pub.shortDescription = u"Bei dieser Hitze kommt man ordentlich ins schwitzen. Nichts desto trotz ist das Sommer Hesseblättche jetzt fertig. \n\nDie Highlights:\n - duftes Quiz\n - schniekes Rätsel\n - lässige Gewinne\n\nViel Spaß beim lesen!"
+    pub.previewUrl = "https://hb.jonashoechst.de/static/sommer2015@2x.jpg"
+    pub.pdfUrl = "https://hb.jonashoechst.de/static/sommer2015.pdf"
+    pub.releaseDate = "2015-07-10T18:00:00+01:00"
+    pub.filesize = "22.6 MB"
+    pub.category = u"Hesseblättche"
+    db.session.add(pub)
+    
+    admin = Admin()
+    admin.username = "admin"
+    admin.email = "admin@example.org"
+    admin.name = "Admin"
+    admin.pw_digest = generate_password_hash("password")
+    db.session.add(admin)
+    
+    db.session.commit()
+
+
 #
 # Login decorator
 def login_required(test):
@@ -245,6 +312,7 @@ def register():
         
     device.name = request.form["name"]
     device.email = request.form["email"]
+    device.apns_token = request.form["apns_token"]
         
     db.session.begin()
     db.session.add(device)
@@ -253,7 +321,15 @@ def register():
     return json.dumps({"status":device.status})
 
 if __name__ == '__main__':
-
+    
+    # Build Sample DB and upload folder, if nonexistant
+    database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
+    if not os.path.exists(database_path):
+        build_sample_db()
+    upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
+    if not os.path.exists(upload_path):
+        os.makedirs(upload_path)
+        
     # Start app
     app.run(debug=True, port=PORT)
 
