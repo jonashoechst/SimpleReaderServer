@@ -115,7 +115,7 @@ def devices():
 @login_required
 def pubs():
     if request.method == "GET":
-        return render_template("pubs.html", pubs=Publication.query.all())
+        return render_template("pubs.html", pubs=Publication.query.order_by(Publication.releaseDate.desc()).all())
     else:
         print(str(request.form))
         if "edit.x" in request.form:
@@ -193,7 +193,7 @@ def new_pub():
 
 @app.route("/api/feed", methods=["POST"])
 def feed():
-    pubs = Publication.query.all()
+    pubs = Publication.query.order_by(Publication.releaseDate.desc()).all()
     cleaned_pubs = [{key: value for (key, value) in vars(pub).iteritems() if key[0] != "_"} for pub in pubs]
     if request.method == "GET":
         return json.dumps({"publications":cleaned_pubs})
