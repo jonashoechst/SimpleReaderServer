@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os, datetime
+import os, datetime, glob
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import *
@@ -133,7 +133,11 @@ def pubs():
             return redirect(url_for("edit_pub", pub_uid=request.form["uid"]))
         elif "delete.x" in request.form:
             Publication.query.filter_by(uid=request.form['uid']).delete()
-            
+            for root, dirs, files in os.walk(upload_path):
+                for file in files:
+                    if (request.form['uid']+".") in file:
+                        os.remove(os.path.join(root, file))
+
             flash(u"Publikation ("+request.form['uid']+u") wurde erfolgreich gelöscht.")
             return redirect(url_for("pubs"))
         elif "download.x" in request.form:
