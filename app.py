@@ -8,13 +8,15 @@ from functools import wraps
 
 from model import *
 
+PORT = 59243
+
 # Create Flask application
-app = Flask(__name__)
+app = Flask(__name__, port=PORT)
 app.secret_key = "0123456789"
 
 
 app.config['UPLOAD_FOLDER'] = "static/uploads/"
-app.config['HOSTNAME'] = "http://localhost:5000"
+app.config['HOSTNAME'] = "http://localhost:"+str(PORT)
 
 # Create database
 app.config['DATABASE_FILE'] = 'SimpleReader.db'
