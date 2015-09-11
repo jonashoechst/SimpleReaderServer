@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 SIMPLE_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 class Device(db.Model):
-    uid = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.Text(36), primary_key=True)
     email = db.Column(db.Text(120))
     name = db.Column(db.Text(64))
     status = db.Column(db.Text(10))
