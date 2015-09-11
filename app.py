@@ -184,6 +184,33 @@ def new_pub():
         return redirect(url_for("pubs"))
     
     
+
+@app.route("/api/feed", methods=["POST"])
+def feed():
+    pubs = Publication.query.all()
+    cleaned_pubs = [{key: value for (key, value) in vars(pub).iteritems() if key[0] != "_"} for pub in pubs]
+    if request.method == "GET":
+        return json.dumps({"publications":cleaned_pubs})
+    elif request.method == "POST":
+        return json.dumps({"publications":cleaned_pubs})
+    
+
+@app.route("/api/register", methods=["POST"])
+def register():
+    device = Device.query.filter_by(uid=request.form["uid"]).first()
+    if device == None:
+        device = Device()
+        device.name = request.form["name"]
+        device.uid = request.form["uid"]
+        device.email = request.form["email"]
+        device.status = "new"
+        
+        db.session.begin()
+        db.session.add(device)
+        db.session.commit()
+        
+    return json.dumps({"status":device.status})
+
 if __name__ == '__main__':
     # Build a sample db on the fly, if one does not exist yet.
     app_dir = os.path.realpath(os.path.dirname(__file__))
