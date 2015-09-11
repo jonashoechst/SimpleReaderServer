@@ -6,24 +6,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import *
 from functools import wraps
 
-from model import *
-
 PORT = 59243
 
 # Create Flask application
 app = Flask(__name__)
 app.secret_key = "0123456789"
-
-
 app.config['UPLOAD_FOLDER'] = "static/uploads/"
 app.config['HOSTNAME'] = "http://localhost:"+str(PORT)
-
-# Create database
 app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
 
+from model import *
 
 @app.route("/admin")
 @app.route("/admin/")
