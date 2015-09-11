@@ -11,7 +11,7 @@ PORT = 59243
 # Create Flask application
 app = Flask(__name__)
 app.secret_key = "0123456789"
-app.config['UPLOAD_FOLDER'] = "static/uploads/"
+app.config['UPLOAD_FOLDER'] = "uploads/"
 app.config['HOSTNAME'] = "http://localhost:"+str(PORT)
 app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
@@ -27,7 +27,7 @@ database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
 if not os.path.exists(database_path):
     build_sample_db()
 
-upload_path = os.path.join(app_dir, app.config['UPLOAD_FOLDER'])
+upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
 if not os.path.exists(upload_path):
     os.makedirs(upload_path)
 
@@ -170,17 +170,18 @@ def new_pub():
         pub.releaseDate = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+01:00")
         
         pdf = request.files['pdf']
-        pdf_ext = pdf.filename.split(".")[-1]
-        pdf_path = os.path.join(upload_path, pub.uid+"."+pdf_ext)
-        pub.pdfUrl = app.config['HOSTNAME']+"/"+app.config['UPLOAD_FOLDER']+pub.uid+"."+pdf_ext
+        pdf_name = pub.uid+"."+pdf.filename.split(".")[-1]
+        pdf_path = os.path.join(upload_path, pdf_name)
+        pub.pdfUrl = url_for('static', filename=app.config['UPLOAD_FOLDER']+pdf_name, _external=True)
         pdf.save(pdf_path)
         
-        preview = request.files['preview']
-        preview_ext = preview.filename.split(".")[-1]
-        preview_path = os.path.join(upload_path, pub.uid+"."+preview_ext)
-        pub.previewUrl = app.config['HOSTNAME']+"/"+app.config['UPLOAD_FOLDER']+pub.uid+"."+preview_ext
-        preview.save(preview_path)
         
+        preview = request.files['preview']
+        preview_name = pub.uid+"."+preview.filename.split(".")[-1]
+        preview_path = os.path.join(upload_path, preview_name)
+        pub.previewUrl = url_for('static', filename=app.config['UPLOAD_FOLDER']+preview_name, _external=True)
+        preview.save(preview_path)
+
         filesize = os.stat(pdf_path).st_size / 1000.0 / 1000.0
         pub.filesize = "{0:.1f} MB".format(filesize)
 
