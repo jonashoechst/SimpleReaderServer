@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import *
 from functools import wraps
 
-PORT = 59243
+PORT = 5000
 
 # Create Flask application
 app = Flask(__name__)
@@ -80,39 +80,36 @@ def devices():
         if "message.x" in request.form:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
             return "Nachricht an "+dev.name+": "+request.form["message_content"];
+            
         elif "delete.x" in request.form:
-            Device.query.filter_by(uid=request.form["uid"]).delete();
-
+            Device.query.filter_by(uid=request.form["uid"]).delete()
             flash(u"Gerät ("+request.form['uid']+u") wurde erfolgreich gelöscht.")
             return redirect(url_for("devices"))
+            
         elif "green.x" in request.form:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
-            dev.status = "green";
-            
+            db.session.begin()
+            dev.status = "green"
+            db.session.commit()
             flash(u"Gerät \""+dev.name+u"\" ist jetzt Grün eingestuft... Begründung: "+request.form["message_content"])
             return redirect(url_for("devices"))
             
         elif "yellow.x" in request.form:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
-            dev.status = "yellow";
-            
+            db.session.begin()
+            dev.status = "yellow"
+            db.session.commit()
             flash(u"Gerät \""+dev.name+u"\" ist jetzt Gelb eingestuft... Begründung: "+request.form["message_content"])
             return redirect(url_for("devices"))
             
         elif "red.x" in request.form:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
-            dev.status = "red";
-            
+            db.session.begin()
+            dev.status = "red"
+            db.session.commit()
             flash(u"Gerät \""+dev.name+u"\" ist jetzt Rot eingestuft... Begründung: "+request.form["message_content"])
             return redirect(url_for("devices"))
             
-
-@app.route("/admin/edit_device/<device_uid>")
-@login_required
-def edit_device(device_uid):
-    return render_template("edit_device.html", device=Device.query.filter_by(uid=device_uid).first())
-    
-
 
 @app.route("/admin/pubs", methods=["GET", "POST"])
 @login_required
@@ -201,7 +198,17 @@ def feed():
     if request.method == "GET":
         return json.dumps({"publications":cleaned_pubs})
     elif request.method == "POST":
-        return json.dumps({"publications":cleaned_pubs})
+        dev = Device.query.filter_by(uid=request.form["uid"]).first()
+        return_dict = {}
+        if dev == None:
+            return_dict["status"] = "unknown"
+        else:
+            return_dict["status"] = dev.status
+            
+        if return_dict["status"] == "green" or return_dict["status"] == "yellow" :
+            return_dict["publications"] = cleaned_pubs
+            
+        return json.dumps(return_dict)
     
 
 @app.route("/api/register", methods=["POST"])
