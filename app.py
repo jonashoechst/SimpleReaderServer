@@ -17,12 +17,14 @@ app_dir = os.path.realpath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.secret_key = "0123456789"
 app.config['UPLOAD_FOLDER'] = "uploads/"
+app.config['SCREENSHOT_FOLDER'] = "screenshots/"
 app.config['HOSTNAME'] = "http://localhost:"+str(PORT)
 app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
 upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
+screenshot_path = os.path.join(app_dir, "static/"+app.config['SCREENSHOT_FOLDER'])
 
 cert_file = os.path.join(app_dir, 'aps_development_combined.pem')
 apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file)
@@ -330,6 +332,18 @@ def register():
     db.session.commit()
         
     return json.dumps({"status":device.status})
+    
+@app.route("/api/report", methods=["POST"])
+def report():
+    device = Device.query.filter_by(uid=request.form["uid"]).first()
+
+    pngdata = request.form['pngdata']
+    png_name = request.form["timestamp"]+"-"+request.form["uid"]+".png"
+    png_path = os.path.join(screenshot_path, png_name)
+    file = open(png_path, "w")
+    file.write(pngdata)
+    file.close()
+    return "success"
 
 if __name__ == '__main__':
     
@@ -339,6 +353,8 @@ if __name__ == '__main__':
         build_sample_db() 
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
+    if not os.path.exists(screenshot_path):
+        os.makedirs(screenshot_path)
         
     # Start app
     app.run(debug=True, port=PORT)
