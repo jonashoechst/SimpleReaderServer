@@ -22,6 +22,7 @@ app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
+upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
 
 cert_file = os.path.join(app_dir, 'aps_development_combined.pem')
 apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file)
@@ -337,7 +338,6 @@ if __name__ == '__main__':
     database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
     if not os.path.exists(database_path):
         build_sample_db()
-    upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
         
