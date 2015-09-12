@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SimpleReader Verwaltung</title>
+    <title>Hesseblättche Verwaltung</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='javascript/helpers.js') }}"></script>
@@ -10,11 +10,17 @@
     <header>
       <div class="navbar navbar-inverse">
         <div class="navbar-inner">
-          <a class="brand" href="/admin">SimpleReader Verwaltung</a>
+          <a class="brand" href="{{ url_for('pubs') }}">Hesseblättche Verwaltung</a>
           <ul class="nav">
-            <li class="active"><a href="{{ url_for('pubs') }}">Publikationen</a></li>
-            <li><a href="{{ url_for('devices') }}">Geräte</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            
+            {% if session.logged_in %}
+            <li {% if request.path == "/admin/pubs" %}class="active"{% endif %}><a href="{{ url_for('pubs') }}">Publikationen</a></li>
+            <li {% if request.path == "/admin/devices" %}class="active"{% endif %}><a href="{{ url_for('devices') }}">Geräte</a></li>
+            <li {% if request.path == "/admin/logout" %}class="active"{% endif %}><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% endif %}
+            {% if not session.logged_in %}
+            <li {% if request.path == "/admin/login" %}class="active"{% endif %}><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>
