@@ -2,6 +2,9 @@
 {% block content %}
   <div class="jumbo">
     <h2>Registrierte Geräte</h2>
+    <form id="message_all" method="post">
+      <input type=submit name="all" value="Nachricht an alle Nutzer" onclick="return sendMessage(document.getElementById('message_all'), 'Push-Nachricht an alle Nutzer:');" > 
+    </form>
     <br/>
     <table class="table table-striped">
         <thead>

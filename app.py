@@ -193,6 +193,23 @@ def devices():
             status = "yellow"
         elif "red.x" in request.form:
             status = "red"
+        elif "all" in request.form:
+            devs = Device.query.all()
+            okays = []
+            fails = []
+            for dev in devs:
+                if send_apn(request.form["message_content"], dev):
+                    okays.append(dev.name)
+                else: 
+                    fails.append(dev.name)
+            flash(u"Push-Nachricht an "+", ".join(okays)+" erfolgreich gesendet.")
+            flash(", ".join(fails)+" erlauben keine Push-Nachrichten.")
+            return redirect(url_for("devices"))
+        else:
+            return "error in /admin/devices"
+            
+        print(str(request.form))
+
             
         if status != None:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
