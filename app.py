@@ -36,6 +36,7 @@ class Device(db.Model):
     name = db.Column(db.Text(64))
     status = db.Column(db.Text(10))
     apns_token = db.Column(db.Text(64))
+    screenshots = db.relationship("Screenshot")
     
     def __unicode__(self):
         return self.uid+"("+self.name+")"

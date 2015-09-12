@@ -8,8 +8,8 @@
           <tr>
             <th>Aktionen</th>
             <th>Status</th>
-            <th>Name</th>
-            <th>Email</th>
+            <th>Name / E-Mail</th>
+            <th>Screenshots</th>
           </tr>
         </thead>
         <tbody>
@@ -30,8 +30,12 @@
               </form>
             </td>
             <td><img src="{{ url_for('static', filename='device_status/'+d.status+'.png') }}"></td>
-            <td>{{ d.name }}<br \>({{ d.uid }})</td>
-            <td><a href="mailto:{{ d.email }}">{{ d.email }}</a></td>
+            <td>{{ d.name }}<br \>({{ d.uid }})<br \><a href="mailto:{{ d.email }}">{{ d.email }}</a></td>
+            <td>
+              {% for shot in d.screenshots %}
+                {{ shot.timestamp }}<br \>
+              {% endfor %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
