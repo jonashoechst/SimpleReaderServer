@@ -79,6 +79,11 @@ class Admin(db.Model):
     def check_password(self, password):
         return check_password_hash(self.pw_digest, password)
 
+class Screenshot(db.Model):
+    gen_id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.Text(36), db.ForeignKey('device.uid'))
+    timestamp = db.Column(db.String(25))
+
 def build_sample_db():
     # db.drop_all()
     db.create_all()
@@ -335,15 +340,22 @@ def register():
     
 @app.route("/api/report", methods=["POST"])
 def report():
-    device = Device.query.filter_by(uid=request.form["uid"]).first()
+    db.session.begin()
+    screenshot = Screenshot()
+    screenshot.uid = request.form["uid"]
+    screenshot.timestamp = request.form["timestamp"]
 
-    pngdata = request.form['pngdata']
-    png_name = request.form["timestamp"]+"-"+request.form["uid"]+".png"
-    png_path = os.path.join(screenshot_path, png_name)
-    file = open(png_path, "w")
-    file.write(pngdata)
-    file.close()
-    return "success"
+    db.session.add(screenshot)
+    db.session.commit()
+    
+    # pngdata = request.form['pngdata'].encode("utf-8")
+    # png_name = request.form["timestamp"]+"-"+request.form["uid"]+".png"
+    # png_path = os.path.join(screenshot_path, png_name)
+    # file = open(png_path, "wb")
+    # file.write(pngdata)
+    # file.close()
+    
+    return json.dumps({"success":True})
 
 if __name__ == '__main__':
     
@@ -357,5 +369,5 @@ if __name__ == '__main__':
         os.makedirs(screenshot_path)
         
     # Start app
-    app.run(debug=True, port=PORT)
+    app.run(debug=True, port=PORT, host='0.0.0.0')
 
