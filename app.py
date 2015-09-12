@@ -23,7 +23,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
 
-apns = APNs(use_sandbox=True, cert_file='aps_development_combined.pem', key_file='aps_development_combined.pem')
+cert_file = os.path.join(app_dir, 'aps_development_combined.pem')
+apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file)
    
 # model definitions
 class Device(db.Model):
