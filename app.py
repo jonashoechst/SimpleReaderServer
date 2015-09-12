@@ -267,14 +267,13 @@ def new_pub():
         pub.releaseDate = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S+01:00")
         
         pdf = request.files['pdf']
-        pdf_name = pub.uid+"."+pdf.filename.split(".")[-1]
+        pdf_name = pub.uid + os.path.splitext(pdf.filename)[1]
         pdf_path = os.path.join(upload_path, pdf_name)
         pub.pdfUrl = url_for('static', filename=app.config['UPLOAD_FOLDER']+pdf_name, _external=True)
         pdf.save(pdf_path)
         
-        
         preview = request.files['preview']
-        preview_name = pub.uid+"."+preview.filename.split(".")[-1]
+        preview_name = pub.uid + os.path.splitext(preview.filename)[1]
         preview_path = os.path.join(upload_path, preview_name)
         pub.previewUrl = url_for('static', filename=app.config['UPLOAD_FOLDER']+preview_name, _external=True)
         preview.save(preview_path)
@@ -337,7 +336,7 @@ if __name__ == '__main__':
     # Build Sample DB and upload folder, if nonexistant
     database_path = os.path.join(app_dir, app.config['DATABASE_FILE'])
     if not os.path.exists(database_path):
-        build_sample_db()
+        build_sample_db() 
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
         
