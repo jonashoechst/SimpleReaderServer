@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from apns import APNs, Payload
 
 # Static Definitions
 PORT = 5000
@@ -21,6 +22,8 @@ app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app, session_options={'autocommit': True})
+
+apns = APNs(use_sandbox=True, cert_file='aps_development_combined.pem', key_file='aps_development_combined.pem')
    
 # model definitions
 class Device(db.Model):
@@ -97,7 +100,14 @@ def build_sample_db():
     
     db.session.commit()
 
-
+def send_apn(message, dev):
+    if len(dev.apns_token) != 64:
+        print("Token: "+dev.apns_token+" len: "+str(len(dev.apns_token)))
+        return False
+    payload = Payload(alert=message, sound="default", custom={'status':dev.status})
+    apns.gateway_server.send_notification(dev.apns_token, payload)
+    return True
+    
 #
 # Login decorator
 def login_required(test):
@@ -155,7 +165,12 @@ def devices():
     else:
         if "message.x" in request.form:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
-            return "Nachricht an "+dev.name+": "+request.form["message_content"];
+            success = send_apn(request.form["message_content"], dev)
+            if success:
+                flash(u"Push-Nachricht an "+dev.name+" erfolgreich gesendet.")
+            else: 
+                flash(dev.name+"erlaubt keine Push-Nachrichten.")      
+            return redirect(url_for("devices"))
             
         elif "delete.x" in request.form:
             Device.query.filter_by(uid=request.form["uid"]).delete()
@@ -163,30 +178,24 @@ def devices():
             return redirect(url_for("devices"))
             
         elif "green.x" in request.form:
-            dev = Device.query.filter_by(uid=request.form["uid"]).first()
-            db.session.begin()
-            dev.status = "green"
-            db.session.commit()
-            flash(u"Gerät \""+dev.name+u"\" ist jetzt Grün eingestuft... Begründung: "+request.form["message_content"])
-            return redirect(url_for("devices"))
-            
+            status = "green"
         elif "yellow.x" in request.form:
-            dev = Device.query.filter_by(uid=request.form["uid"]).first()
-            db.session.begin()
-            dev.status = "yellow"
-            db.session.commit()
-            flash(u"Gerät \""+dev.name+u"\" ist jetzt Gelb eingestuft... Begründung: "+request.form["message_content"])
-            return redirect(url_for("devices"))
-            
+            status = "yellow"
         elif "red.x" in request.form:
+            status = "red"
+            
+        if status != None:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
             db.session.begin()
-            dev.status = "red"
+            dev.status = status
             db.session.commit()
-            flash(u"Gerät \""+dev.name+u"\" ist jetzt Rot eingestuft... Begründung: "+request.form["message_content"])
-            return redirect(url_for("devices"))
             
-
+            success = send_apn(request.form["message_content"], dev)
+            if success:
+                flash(u"Gerät \""+dev.name+u"\" ist jetzt "+status+" eingestuft... Push-Nachricht gesendet: "+request.form["message_content"])
+            else:
+                flash(u"Gerät \""+dev.name+u"\" ist jetzt "+status+" eingestuft... "+dev.name+" erlaubt keine Push-Nachrichten." )
+            return redirect(url_for("devices"))
 #
 # Administrate Publications
 @app.route("/admin/pubs", methods=["GET", "POST"])
