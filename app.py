@@ -255,6 +255,8 @@ def new_pub():
     if request.method == "GET":
         return render_template("new_pub.html")
     else:
+        db.session.begin()
+        
         pub = Publication()
         pub.title = request.form['title']
         pub.generateUid()
@@ -278,7 +280,6 @@ def new_pub():
         filesize = os.stat(pdf_path).st_size / 1000.0 / 1000.0
         pub.filesize = "{0:.1f} MB".format(filesize)
 
-        db.session.begin()
         db.session.add(pub)
         db.session.commit()
         
