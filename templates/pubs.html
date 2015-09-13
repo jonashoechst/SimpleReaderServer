@@ -23,6 +23,7 @@
                 <input type="image" name="edit" src="{{ url_for('static', filename='edit.png') }}" />
                 <input type="image" name="delete" src="{{ url_for('static', filename='bin.png') }}" onclick="return confirm('Bist du sicher, dass du \'\'{{ p.title }}\'\' löschen möchtest?');" />
                 <input type="image" name="download" src="{{ url_for('static', filename='download.png') }}" />
+                <input type="image" name="message" src="{{ url_for('static', filename='message.png') }}" onclick="return sendMessage(document.getElementById('actions_{{ p.uid }}'), 'Push-Nachricht für die Publikation: ');"  />
               </form>
                 <!-- <a href="/admin/edit_pub/{{ p.uid }}"><img src="/static/edit.png"></a>
                 <input type="image" name="your_image_name" src="your_image_url.png" />

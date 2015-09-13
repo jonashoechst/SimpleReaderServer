@@ -40,6 +40,11 @@ class Device(db.Model):
     
     def __unicode__(self):
         return self.uid+"("+self.name+")"
+    
+    def isAllowed(self):
+        if self.status == "green" or self.status == "yellow":
+            return True
+        return False
         
 class Publication(db.Model):
     uid = db.Column(db.String(120), primary_key=True)
@@ -50,6 +55,9 @@ class Publication(db.Model):
     releaseDate = db.Column(db.String(25))
     filesize = db.Column(db.String(25))
     category = db.Column(db.Text(25))
+    
+    def getDict(self):
+        return {key: value for (key, value) in vars(self).iteritems() if key[0] != "_"}
     
     def generateUid(self):
         if self.uid != None:
@@ -110,14 +118,17 @@ def build_sample_db():
     
     db.session.commit()
 
-def send_apn(message, dev):
+def send_apn(message, dev, pub=None):
     if len(dev.apns_token) != 64:
         print("Token: "+dev.apns_token+" len: "+str(len(dev.apns_token)))
-        return False
-    payload = Payload(alert=message, sound="default", custom={'status':dev.status})
+        return False     
+    custom_payload = {'status':dev.status}
+    if pub and dev.status:
+        custom_payload["pub"] = pub.getDict()
+    payload = Payload(alert=message, sound="default", custom=custom_payload)
     apns.gateway_server.send_notification(dev.apns_token, payload)
     return True
-    
+
 #
 # Login decorator
 def login_required(test):
@@ -246,6 +257,19 @@ def pubs():
         elif "download.x" in request.form:
             pub = Publication.query.filter_by(uid=request.form['uid']).first()
             return redirect(pub.pdfUrl)
+        elif "message.x" in request.form:
+            pub = Publication.query.filter_by(uid=request.form['uid']).first()
+            devs = Device.query.all()
+            okays = []
+            fails = []
+            for dev in devs:
+                if send_apn(request.form["message_content"], dev, pub=pub):
+                    okays.append(dev.name)
+                else: 
+                    fails.append(dev.name)
+            flash(u"Push-Nachricht an "+", ".join(okays)+" erfolgreich gesendet.")
+            flash(", ".join(fails)+" erlauben keine Push-Nachrichten.")
+            return redirect(url_for("pubs"))
         else:
             return "Function not implemented."
          
@@ -319,7 +343,7 @@ def new_pub():
 @app.route("/api/feed", methods=["POST"])
 def feed():
     pubs = Publication.query.order_by(Publication.releaseDate.desc()).all()
-    cleaned_pubs = [{key: value for (key, value) in vars(pub).iteritems() if key[0] != "_"} for pub in pubs]
+    cleaned_pubs = [pub.getDict() for pub in pubs]
     if request.method == "GET":
         return json.dumps({"publications":cleaned_pubs})
     elif request.method == "POST":
