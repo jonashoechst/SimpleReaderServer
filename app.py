@@ -22,6 +22,8 @@ app.config['HOSTNAME'] = "http://localhost:"+str(PORT)
 app.config['DATABASE_FILE'] = 'SimpleReader.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['PREFERRED_URL_SCHEME'] = 'https'
+
 db = SQLAlchemy(app, session_options={'autocommit': True})
 upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
 screenshot_path = os.path.join(app_dir, "static/"+app.config['SCREENSHOT_FOLDER'])
