@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import os, datetime, glob
+import os, datetime, glob, time
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from apns import APNs, Payload
+from apns import APNs, Payload, Frame
 
 # Static Definitions
 SIMPLE_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -28,7 +28,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///"+app.config["DATABASE_FILE"]
 db = SQLAlchemy(app, session_options={'autocommit': True})
 upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
 cert_file = os.path.join(app_dir, app.config["APS_CERT"])
-apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file)
+apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file, enhanced=True)
    
 # model definitions
 class Device(db.Model):
@@ -130,9 +130,9 @@ def send_multi_apn(message, devs, pub=None):
         payload = craft_apn_payload(message, dev, pub=pub)
         if payload:
             frame.add_item(dev.apns_token, payload, identifier, expiry, priority)
-            send.append(dev)
+            send.append(dev.name)
         else:
-            unsend.append(dev)
+            unsend.append(dev.name)
 
     apns.gateway_server.send_notification_multiple(frame)
     return (send, unsend)
