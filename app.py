@@ -403,7 +403,7 @@ def report():
         device.status = "yellow"
     elif device.status == "yellow":
         device.status = "red"
-    else device.status == "new" and app.config['NEW_DEV_IS_ALLOWED']:
+    elif app.config['NEW_DEV_IS_ALLOWED'] and device.status == "new":
         device.status = "yellow"
 
     db.session.commit()
