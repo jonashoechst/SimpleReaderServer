@@ -395,18 +395,18 @@ def report():
     screenshot = Screenshot()
     screenshot.uid = request.form["uid"]
     screenshot.timestamp = request.form["timestamp"]
-
     db.session.add(screenshot)
+
+    device = Device.query.filter_by(uid=request.form["uid"]).first()
+    if device.status == "green":
+        device.status = "yellow"
+    elif device.status == "yellow":
+        device.status = "red"
+    else device.status == "new" and app.config['NEW_DEV_IS_ALLOWED']:
+        device.status = "yellow"
+
     db.session.commit()
-    
-    # pngdata = request.form['pngdata'].encode("utf-8")
-    # png_name = request.form["timestamp"]+"-"+request.form["uid"]+".png"
-    # png_path = os.path.join(screenshot_path, png_name)
-    # file = open(png_path, "wb")
-    # file.write(pngdata)
-    # file.close()
-    
-    return json.dumps({"success":True})
+    return feed()
 
 if __name__ == '__main__':
     
