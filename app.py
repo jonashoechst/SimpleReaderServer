@@ -14,7 +14,7 @@ app_dir = os.path.realpath(os.path.dirname(__file__))
 
 # load config
 data = ""
-with open('config.json') as f:
+with open(os.path.join(app_dir,'config.json')) as f:
     for line in f:
         data += line
 json_config = json.loads(data)
