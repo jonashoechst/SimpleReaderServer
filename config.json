@@ -5,5 +5,6 @@
     "PREFERRED_URL_SCHEME": "https",
     "APS_CERT": "aps_development_combined.pem",
     
-    "NEW_DEV_IS_ALLOWED": true
+    "NEW_DEV_IS_ALLOWED": true,
+	"SERVICE_NAME": "Hesseblättche"
 }
