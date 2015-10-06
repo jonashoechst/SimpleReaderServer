@@ -60,7 +60,8 @@ class Publication(db.Model):
     category = db.Column(db.Text(25))
     
     def getDict(self):
-        return {key: value for (key, value) in vars(self).iteritems() if key[0] != "_"}
+        return dict((key, value) for (key, value) in vars(self).iteritems() if key[0] != "_")
+        # return {key: value for (key, value) in vars(self).iteritems() if key[0] != "_"}
     
     def generateUid(self):
         if self.uid != None:
