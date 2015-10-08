@@ -1,3 +1,4 @@
 SimpleReader.db
 static/uploads
 *.pem
+config.json
