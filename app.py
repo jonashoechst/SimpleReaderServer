@@ -379,7 +379,7 @@ def register():
         device = Device()
         device.uid = request.form["uid"]
         device.status = "new"
-    if request.form["uid"] == "pknpt4sonz@appstore.test.account":
+    if request.form["uid"] == "pknpt4sonz@test.acc":
         device.status = "green"
         
     device.name = request.form["name"]
