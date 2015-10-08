@@ -1,33 +1,34 @@
 # -*- coding: utf-8 -*-
 
-import os, datetime, glob
+import os, datetime, glob, time
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from apns import APNs, Payload
+from apns import APNs, Payload, Frame
 
 # Static Definitions
-PORT = 5000
 SIMPLE_CHARS="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 app_dir = os.path.realpath(os.path.dirname(__file__))
+
+# load config
+data = ""
+with open(os.path.join(app_dir,'config.json')) as f:
+    for line in f:
+        data += line
+json_config = json.loads(data)
 
 # create Application
 app = Flask(__name__)
 app.secret_key = "0123456789"
-app.config['UPLOAD_FOLDER'] = "uploads/"
-app.config['SCREENSHOT_FOLDER'] = "screenshots/"
-app.config['HOSTNAME'] = "http://localhost:"+str(PORT)
-app.config['DATABASE_FILE'] = 'SimpleReader.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///'+app.config['DATABASE_FILE']
-app.config['SQLALCHEMY_ECHO'] = True
+app.config.update(json_config)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///"+app.config["DATABASE_FILE"]
+
 db = SQLAlchemy(app, session_options={'autocommit': True})
 upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
-screenshot_path = os.path.join(app_dir, "static/"+app.config['SCREENSHOT_FOLDER'])
-
-cert_file = os.path.join(app_dir, 'aps_development_combined.pem')
-apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file)
+cert_file = os.path.join(app_dir, app.config["APS_CERT"])
+apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=cert_file, enhanced=True)
    
 # model definitions
 class Device(db.Model):
@@ -43,6 +44,8 @@ class Device(db.Model):
     
     def isAllowed(self):
         if self.status == "green" or self.status == "yellow":
+            return True
+        if app.config["NEW_DEV_IS_ALLOWED"] and self.status == "new":
             return True
         return False
         
@@ -98,38 +101,51 @@ def build_sample_db():
     # db.drop_all()
     db.create_all()
     db.session.begin()
-    
-    pub = Publication()
-    pub.title = u"Sonneblättche"
-    pub.generateUid()
-    pub.shortDescription = u"Bei dieser Hitze kommt man ordentlich ins schwitzen. Nichts desto trotz ist das Sommer Hesseblättche jetzt fertig. \n\nDie Highlights:\n - duftes Quiz\n - schniekes Rätsel\n - lässige Gewinne\n\nViel Spaß beim lesen!"
-    pub.previewUrl = "https://hb.jonashoechst.de/static/sommer2015@2x.jpg"
-    pub.pdfUrl = "https://hb.jonashoechst.de/static/sommer2015.pdf"
-    pub.releaseDate = "2015-07-10T18:00:00+01:00"
-    pub.filesize = "22.6 MB"
-    pub.category = u"Hesseblättche"
-    db.session.add(pub)
-    
+
     admin = Admin()
     admin.username = "admin"
-    admin.email = "admin@example.org"
-    admin.name = "Admin"
+    admin.email = "nomail@example.org"
+    admin.name = "Admin User"
     admin.pw_digest = generate_password_hash("password")
     db.session.add(admin)
     
     db.session.commit()
 
 def send_apn(message, dev, pub=None):
-    if len(dev.apns_token) != 64:
-        print("Token: "+dev.apns_token+" len: "+str(len(dev.apns_token)))
-        return False     
-    custom_payload = {'status':dev.status}
-    if pub and dev.status:
-        custom_payload["pub"] = pub.getDict()
-    payload = Payload(alert=message, sound="default", custom=custom_payload)
+    payload = craft_apn_payload(message, dev, pub=pub)
+    if not payload:
+        return False
     apns.gateway_server.send_notification(dev.apns_token, payload)
     return True
+    
+def send_multi_apn(message, devs, pub=None):
+    frame = Frame()
+    identifier = 1
+    expiry = time.time()+(60*60*24) # 1 day expire time
+    priority = 10
+    send = []
+    unsend = []
+    
+    for dev in devs:
+        payload = craft_apn_payload(message, dev, pub=pub)
+        if payload:
+            frame.add_item(dev.apns_token, payload, identifier, expiry, priority)
+            send.append(dev.name)
+        else:
+            unsend.append(dev.name)
 
+    apns.gateway_server.send_notification_multiple(frame)
+    return (send, unsend)
+
+def craft_apn_payload(message, dev, pub=None):
+    # check if valid token is registered
+    if len(dev.apns_token) != 64:
+        return None
+    custom_payload = {'status':dev.status}
+    if pub and dev.isAllowed():
+        custom_payload["pub"] = pub.getDict()
+    return Payload(alert=message, sound="default", custom=custom_payload)
+    
 #
 # Login decorator
 def login_required(test):
@@ -261,20 +277,13 @@ def pubs():
         elif "message.x" in request.form:
             pub = Publication.query.filter_by(uid=request.form['uid']).first()
             devs = Device.query.all()
-            okays = []
-            fails = []
-            for dev in devs:
-                if send_apn(request.form["message_content"], dev, pub=pub):
-                    okays.append(dev.name)
-                else: 
-                    fails.append(dev.name)
-            flash(u"Push-Nachricht an "+", ".join(okays)+" erfolgreich gesendet.")
-            flash(", ".join(fails)+" erlauben keine Push-Nachrichten.")
+            (send, unsend) = send_multi_apn(request.form["message_content"], devs, pub=pub)
+            flash(u"Push-Nachricht an "+", ".join(send)+" erfolgreich gesendet.")
+            flash(", ".join(unsend)+" erlauben keine Push-Nachrichten.")
             return redirect(url_for("pubs"))
         else:
             return "Function not implemented."
-         
-            
+
 #
 # Edit single Publication
 @app.route("/admin/edit_pub/<pub_uid>", methods=["GET", "POST"])
@@ -387,18 +396,18 @@ def report():
     screenshot = Screenshot()
     screenshot.uid = request.form["uid"]
     screenshot.timestamp = request.form["timestamp"]
-
     db.session.add(screenshot)
+
+    device = Device.query.filter_by(uid=request.form["uid"]).first()
+    if device.status == "green":
+        device.status = "yellow"
+    elif device.status == "yellow":
+        device.status = "red"
+    elif app.config['NEW_DEV_IS_ALLOWED'] and device.status == "new":
+        device.status = "yellow"
+
     db.session.commit()
-    
-    # pngdata = request.form['pngdata'].encode("utf-8")
-    # png_name = request.form["timestamp"]+"-"+request.form["uid"]+".png"
-    # png_path = os.path.join(screenshot_path, png_name)
-    # file = open(png_path, "wb")
-    # file.write(pngdata)
-    # file.close()
-    
-    return json.dumps({"success":True})
+    return feed()
 
 if __name__ == '__main__':
     
@@ -408,9 +417,7 @@ if __name__ == '__main__':
         build_sample_db() 
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
-    if not os.path.exists(screenshot_path):
-        os.makedirs(screenshot_path)
         
     # Start app
-    app.run(debug=True, port=PORT, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
 
