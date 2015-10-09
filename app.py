@@ -25,6 +25,11 @@ app.secret_key = "0123456789"
 app.config.update(json_config)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///"+app.config["DATABASE_FILE"]
 
+try:
+    import thumbs
+except ImportError:
+    app.config["RENDER_PREVIEWS"] = False
+    
 db = SQLAlchemy(app, session_options={'autocommit': True})
 upload_path = os.path.join(app_dir, "static/"+app.config['UPLOAD_FOLDER'])
 cert_file = os.path.join(app_dir, app.config["APS_CERT"])
@@ -330,12 +335,17 @@ def new_pub():
         pdf_path = os.path.join(upload_path, pdf_name)
         pub.pdfUrl = url_for('static', filename=app.config['UPLOAD_FOLDER']+pdf_name, _external=True)
         pdf.save(pdf_path)
-        
+
         preview = request.files['preview']
-        preview_name = pub.uid + os.path.splitext(preview.filename)[1]
+        preview_ext = os.path.splitext(preview.filename)[1] if preview else ".jpg"
+        preview_name = pub.uid + preview_ext
         preview_path = os.path.join(upload_path, preview_name)
         pub.previewUrl = url_for('static', filename=app.config['UPLOAD_FOLDER']+preview_name, _external=True)
-        preview.save(preview_path)
+
+        if app.config["RENDER_PREVIEWS"]:
+            thumbs.save_thumbnail(pdf_path, preview_path, app.config["PREVIEW_RENDER_DPI"], app.config["PREVIEW_WIDTH"], app.config["PREVIEW_HEIGTH"])
+        else:
+            preview.save(preview_path)
 
         filesize = os.stat(pdf_path).st_size / 1000.0 / 1000.0
         pub.filesize = "{0:.1f} MB".format(filesize)

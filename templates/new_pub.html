@@ -12,8 +12,13 @@
       <dd><input type=text name=category>
       <dt>PDF Datei:
       <dd><input type="file" name="pdf">
-      <dt>Vorschau Datei:
+	  {% if config['RENDER_PREVIEWS'] == False %}
+      <dt>Vorschaubild:
       <dd><input type="file" name="preview">
+      {% else %}
+      <dt>Vorschaubild wird aus dem PDF erzeugt.
+      <dd style="visibility: hidden"><input type="file" name="preview">
+      {% endif %}
       </dd>
     </dl>
     <p><input type=button onclick="history.back();" value="Zurück"> <input type=submit value="Veröffentlichen"> 
