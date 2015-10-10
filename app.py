@@ -399,12 +399,13 @@ def register():
     device.name = request.form["name"]
     device.email = request.form["email"]
     device.apns_token = request.form["apns_token"]
+    device.lastMessage = "Du bist neu angemeldet und musst erst freigeschaltet werden."
         
     db.session.begin()
     db.session.add(device)
     db.session.commit()
         
-    return json.dumps({"status":device.status})
+    return json.dumps({"status":device.status, "lastMessage":device.lastMessage})
     
 @app.route("/api/report", methods=["POST"])
 def report():
