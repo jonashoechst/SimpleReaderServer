@@ -375,11 +375,12 @@ def feed():
             return_dict["status"] = "unknown"
         else:
             return_dict["status"] = dev.status
+            return_dict["lastMessage"] = dev.lastMessage
             
         if return_dict["status"] == "green" or return_dict["status"] == "yellow" :
             return_dict["publications"] = cleaned_pubs
+            return_dict["lastMessage"] = dev.lastMessage
             
-        return_dict["lastMessage"] = dev.lastMessage
         return json.dumps(return_dict)
     
 
