@@ -424,7 +424,7 @@ def report():
         device.status = "yellow"
         textColor = "gelb"
 
-    dev.lastMessage = "Du hast einen Screenshot gemacht und bist jetzt "+textColor+" eingestuft."
+    device.lastMessage = "Du hast einen Screenshot gemacht und bist jetzt "+textColor+" eingestuft."
     db.session.commit()
     return feed()
 
