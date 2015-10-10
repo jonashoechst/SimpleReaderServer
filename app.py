@@ -223,7 +223,7 @@ def devices():
             
         elif "green.x" in request.form:
             status = "green"
-            textColor = "grün"
+            textColor = u"grün"
         elif "yellow.x" in request.form:
             status = "yellow"
             textColor = "gelb"
@@ -424,7 +424,7 @@ def report():
         device.status = "yellow"
         textColor = "gelb"
 
-    device.lastMessage = "Du hast einen Screenshot gemacht und bist jetzt "+textColor+" eingestuft."
+    device.lastMessage = "Du hast "+str(len(device.screenshots))+" Screenshots gemacht und bist jetzt "+textColor+" eingestuft."
     db.session.commit()
     return feed()
 
