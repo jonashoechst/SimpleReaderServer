@@ -404,7 +404,7 @@ def register():
     db.session.add(device)
     db.session.commit()
         
-    return json.dumps({"status":device.status, "lastMessage":dev.lastMessage})
+    return json.dumps({"status":device.status})
     
 @app.route("/api/report", methods=["POST"])
 def report():
