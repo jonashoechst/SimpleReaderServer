@@ -43,6 +43,7 @@ class Device(db.Model):
     status = db.Column(db.Text(10))
     apns_token = db.Column(db.Text(64))
     screenshots = db.relationship("Screenshot")
+    lastMessage = db.Column(db.Text(1024))
     
     def __unicode__(self):
         return self.uid+"("+self.name+")"
@@ -146,7 +147,7 @@ def craft_apn_payload(message, dev, pub=None):
     # check if valid token is registered
     if len(dev.apns_token) != 64:
         return None
-    custom_payload = {'status':dev.status}
+    custom_payload = {'status':dev.status, "lastMessage":dev.lastMessage}
     if pub and dev.isAllowed():
         custom_payload["pub"] = pub.getDict()
     return Payload(alert=message, sound="default", custom=custom_payload)
@@ -222,10 +223,13 @@ def devices():
             
         elif "green.x" in request.form:
             status = "green"
+            textColor = "grün"
         elif "yellow.x" in request.form:
             status = "yellow"
+            textColor = "gelb"
         elif "red.x" in request.form:
             status = "red"
+            textColor = "rot"
         elif "all" in request.form:
             devs = Device.query.all()
             okays = []
@@ -240,14 +244,12 @@ def devices():
             return redirect(url_for("devices"))
         else:
             return "error in /admin/devices"
-            
-        print(str(request.form))
 
-            
         if status != None:
             dev = Device.query.filter_by(uid=request.form["uid"]).first()
             db.session.begin()
             dev.status = status
+            dev.lastMessage = "Du bist jetzt "+textColor+" eingestuft: "+request.form["message_content"]
             db.session.commit()
             
             success = send_apn(request.form["message_content"], dev)
@@ -377,6 +379,7 @@ def feed():
         if return_dict["status"] == "green" or return_dict["status"] == "yellow" :
             return_dict["publications"] = cleaned_pubs
             
+        return_dict["lastMessage"] = dev.lastMessage
         return json.dumps(return_dict)
     
 
@@ -400,7 +403,7 @@ def register():
     db.session.add(device)
     db.session.commit()
         
-    return json.dumps({"status":device.status})
+    return json.dumps({"status":device.status, "lastMessage":dev.lastMessage})
     
 @app.route("/api/report", methods=["POST"])
 def report():
@@ -413,11 +416,15 @@ def report():
     device = Device.query.filter_by(uid=request.form["uid"]).first()
     if device.status == "green":
         device.status = "yellow"
+        textColor = "gelb"
     elif device.status == "yellow":
         device.status = "red"
+        textColor = "rot"
     elif app.config['NEW_DEV_IS_ALLOWED'] and device.status == "new":
         device.status = "yellow"
+        textColor = "gelb"
 
+    dev.lastMessage = "Du hast einen Screenshot gemacht und bist jetzt "+textColor+" eingestuft."
     db.session.commit()
     return feed()
 
