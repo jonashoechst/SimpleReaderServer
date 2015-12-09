@@ -19,7 +19,7 @@
               <form id="actions_{{ a.email }}" method="post">
                 <input type="hidden" name="email" value="{{ a.email }}" />
                 
-                <input type="image" name="delete" src="{{ url_for('static', filename='bin.png') }}" onclick="return confirm('Bist du sicher, dass du \'\'{{ a.username }}\'\' löschen möchtest?');" />
+                <input type="image" name="delete" src="{{ url_for('static', filename='bin.png') }}" onclick="return confirm('Bist du sicher, dass du {{ a.name }} löschen möchtest?');" />
                 
                 <input type="image" name="edit" src="{{ url_for('static', filename='edit.png') }}" />
                 

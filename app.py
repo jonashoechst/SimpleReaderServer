@@ -271,8 +271,8 @@ def admins():
             return redirect(url_for("edit_admin", email=request.form["email"]))
             
         elif "delete.x" in request.form:
-            Admin.query.filter_by(username=request.form["username"]).delete()
-            flash(u"Admin ("+request.form['username']+u") wurde erfolgreich gelöscht.")
+            Admin.query.filter_by(email=request.form["email"]).delete()
+            flash(u"Admin ("+request.form['email']+u") wurde erfolgreich gelöscht.")
             return redirect(url_for("admins"))
 
         else:
@@ -311,10 +311,9 @@ def edit_admin(email):
         admin.name = request.form['name']
         if request.form['password'] != "":
             admin.pw_digest = generate_password_hash(request.form['password'])
-            flash("Password von "+admin.email+u" wurde geändert: "+request.form['password'])
         db.session.commit()
         
-        flash(admin.email+" wurde gespeichert.")
+        flash("Admin ("+admin.email+") wurde aktualisiert.")
         return redirect(url_for("admins"))
     
 #
