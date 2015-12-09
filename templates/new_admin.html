@@ -1,0 +1,18 @@
+{% extends "template.html" %}
+{% block content %}
+  <div class="jumbo">
+  <h2>Administrator hinzufügen:</h2>
+  <form action="" method=post enctype="multipart/form-data">
+    <dl>
+      <dt>Name:
+      <dd><input type=text name=name>
+      <dt>E-Mail:
+      <dd><input type=text name=email>
+      <dt>Passwort:
+      <dd><input type=password name=password>
+      </dd>
+    </dl>
+    <p><input type=button onclick="history.back();" value="Zurück"> <input type=submit value="Hinzufügen"> 
+  </form>
+</div>
+{% endblock %}

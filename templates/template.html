@@ -16,12 +16,18 @@
             {% if session.logged_in %}
             <li {% if request.path == "/admin/pubs" %}class="active"{% endif %}><a href="{{ url_for('pubs') }}">Publikationen</a></li>
             <li {% if request.path == "/admin/devices" %}class="active"{% endif %}><a href="{{ url_for('devices') }}">Geräte</a></li>
+            <li {% if request.path == "/admin/admins" %}class="active"{% endif %}><a href="{{ url_for('admins') }}">Admins</a></li>
             <li {% if request.path == "/admin/logout" %}class="active"{% endif %}><a href="{{ url_for('logout') }}">Logout</a></li>
             {% endif %}
             {% if not session.logged_in %}
             <li {% if request.path == "/admin/login" %}class="active"{% endif %}><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
           </ul>
+          
+          {% if session.logged_in %}
+            <p class="navbar-text pull-right">{{ session["admin_name"] }}</p>
+          {% endif %}
+          
         </div>
       </div>
     <br/>

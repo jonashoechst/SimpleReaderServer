@@ -90,9 +90,8 @@ class Publication(db.Model):
         return "Publication: "+self.uid+"("+self.title+")"
     
 class Admin(db.Model):
-    username = db.Column(db.Text(64), primary_key=True)
     name = db.Column(db.Text(64))
-    email = db.Column(db.Text(120))
+    email = db.Column(db.Text(120), primary_key=True)
     pw_digest = db.Column(db.Text(64))
     
     def check_password(self, password):
@@ -109,8 +108,7 @@ def build_sample_db():
     db.session.begin()
 
     admin = Admin()
-    admin.username = "admin"
-    admin.email = "nomail@example.org"
+    admin.email = "admin@example.org"
     admin.name = "Admin User"
     admin.pw_digest = generate_password_hash("password")
     db.session.add(admin)
@@ -176,14 +174,16 @@ def home():
 @app.route("/admin/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user = Admin.query.filter_by(username=request.form["username"]).first()
-        if user == None:
-            flash("Falscher Nutzername.")
-        elif not user.check_password(request.form["password"]):
+        admin = Admin.query.filter_by(email=request.form["email"]).first()
+        if admin == None:
+            flash("Falsche E-Mail Adresse.")
+        elif not admin.check_password(request.form["password"]):
             flash("Falsches Passwort.")
         else:
             session["logged_in"] = True
-
+            session["admin_name"] = admin.name
+            session["admin_email"] = admin.email
+            
             flash("Login erfolgreich!")
             return redirect (url_for("pubs"))
             
@@ -258,6 +258,65 @@ def devices():
             else:
                 flash(u"Gerät \""+dev.name+u"\" ist jetzt "+status+" eingestuft... "+dev.name+" erlaubt keine Push-Nachrichten." )
             return redirect(url_for("devices"))
+#
+# Administrate Admins
+@app.route("/admin/admins", methods=["GET", "POST"])
+@login_required
+def admins():
+    if request.method == "GET":
+        return render_template("admins.html", admins=Admin.query.all())
+    else:
+        if "edit.x" in request.form:
+            admin = Admin.query.filter_by(email=request.form["email"]).first()
+            return redirect(url_for("edit_admin", email=request.form["email"]))
+            
+        elif "delete.x" in request.form:
+            Admin.query.filter_by(username=request.form["username"]).delete()
+            flash(u"Admin ("+request.form['username']+u") wurde erfolgreich gelöscht.")
+            return redirect(url_for("admins"))
+
+        else:
+            return "error in /admin/admins"
+            
+#
+# To create a new Admin
+@app.route("/admin/new_admin", methods=["GET", "POST"])
+@login_required
+def new_admin():
+    if request.method == "GET":
+        return render_template("new_admin.html")
+    else:
+        db.session.begin()
+        
+        admin = Admin()
+        admin.name = request.form['name']
+        admin.email = request.form['email']
+        admin.pw_digest = generate_password_hash(request.form['password'])
+        db.session.add(admin)
+        db.session.commit()
+        
+        flash(admin.name+u" wurde hinzugefügt.")
+        return redirect(url_for("admins"))
+#
+# Edit Admin Account
+@app.route("/admin/edit_admin/<email>", methods=["GET", "POST"])
+@login_required
+def edit_admin(email):
+    if request.method == "GET":
+        return render_template("edit_admin.html", admin=Admin.query.filter_by(email=email).first())
+    else:
+        admin = Admin.query.filter_by(email=request.form['email']).first()
+        
+        db.session.begin()
+        admin.name = request.form['name']
+        if request.form['password'] != "":
+            admin.pw_digest = generate_password_hash(request.form['password'])
+            flash("Password von "+admin.email+u" wurde geändert: "+request.form['password'])
+        db.session.commit()
+        
+        flash(admin.email+" wurde gespeichert.")
+        return redirect(url_for("admins"))
+    
 #
 # Administrate Publications
 @app.route("/admin/pubs", methods=["GET", "POST"])

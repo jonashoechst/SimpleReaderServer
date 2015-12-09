@@ -1,0 +1,18 @@
+{% extends "template.html" %}
+{% block content %}
+  <div class="jumbo">
+  <h2>Administrator bearbeiten:</h2>
+  <form action="" method=post enctype="multipart/form-data">
+    <dl>
+      <input type=hidden name=email value="{{ admin.email }}">
+      <dt>E-Mail: {{ admin.email }}
+      <dt>Name:
+      <dd><input type=text name=name value="{{ admin.name }}">
+      <dt>Passwort (bei leerem Feld unverändert):
+      <dd><input type=password name=password>
+      </dd>
+    </dl>
+    <p><input type=button onclick="history.back();" value="Zurück"> <input type=submit value="Ändern"> 
+  </form>
+</div>
+{% endblock %}
