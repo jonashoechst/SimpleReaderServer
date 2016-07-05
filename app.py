@@ -451,13 +451,13 @@ def register():
         device = Device()
         device.uid = request.form["uid"]
         device.status = "new"
+        device.lastMessage = "Du bist neu angemeldet und musst erst freigeschaltet werden."
     if request.form["uid"] == "pknpt4sonz@test.acc":
         device.status = "green"
         
     device.name = request.form["name"]
     device.email = request.form["email"]
     device.apns_token = request.form["apns_token"]
-    device.lastMessage = "Du bist neu angemeldet und musst erst freigeschaltet werden."
         
     db.session.begin()
     db.session.add(device)
