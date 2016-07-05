@@ -484,7 +484,10 @@ def report():
         device.status = "yellow"
         textColor = "gelb"
 
-    device.lastMessage = "Du hast "+str(len(device.screenshots))+" Screenshots gemacht und bist jetzt "+textColor+" eingestuft."
+    if len(device.screenshots) == 1: screenshotText = "einen Screenshot"
+    else: str(len(device.screenshots))+" Screenshots"
+
+    device.lastMessage = "Du hast "+screenshotText+" gemacht und bist jetzt "+textColor+" eingestuft."
     db.session.commit()
     return feed()
 
