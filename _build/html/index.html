@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to SimpleReaderServer’s documentation! &#8212; SimpleReaderServer 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="SimpleReaderServer 0.9 documentation" href="#" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-simplereaderserver-s-documentation">
+<h1>Welcome to SimpleReaderServer&#8217;s documentation!<a class="headerlink" href="#welcome-to-simplereaderserver-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-thumbs"></span><dl class="function">
+<dt id="thumbs.save_thumbnail">
+<code class="descclassname">thumbs.</code><code class="descname">save_thumbnail</code><span class="sig-paren">(</span><em>pdf_path</em>, <em>jpg_path</em>, <em>DPI=200</em>, <em>WIDTH=340</em>, <em>HEIGHT=480</em><span class="sig-paren">)</span><a class="headerlink" href="#thumbs.save_thumbnail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a thumbnail at jpg_path for a given pdf_path.</p>
+<p>DPI controls the pdf rendering resolution.
+WIDTH/HEIGHT represents the resolution of the saved jpg.</p>
+</dd></dl>
+
+<span class="target" id="module-app"></span><dl class="class">
+<dt id="app.Admin">
+<em class="property">class </em><code class="descclassname">app.</code><code class="descname">Admin</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.Admin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database Model for administrator accounts.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="app.Device">
+<em class="property">class </em><code class="descclassname">app.</code><code class="descname">Device</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.Device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database Model for a registered user device.</p>
+<dl class="method">
+<dt id="app.Device.isAllowed">
+<code class="descname">isAllowed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.Device.isAllowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>simple check, wether the device is allowed to update the feed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="app.Publication">
+<em class="property">class </em><code class="descclassname">app.</code><code class="descname">Publication</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.Publication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database Model for created publications.</p>
+<dl class="method">
+<dt id="app.Publication.generateUid">
+<code class="descname">generateUid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.Publication.generateUid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an identifier for a new publication, based on the name and a running number.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="app.Publication.getDict">
+<code class="descname">getDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.Publication.getDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all public variables of the publication.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="app.Screenshot">
+<em class="property">class </em><code class="descclassname">app.</code><code class="descname">Screenshot</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.Screenshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database model for screenshot entries.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.admins">
+<code class="descclassname">app.</code><code class="descname">admins</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.admins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the admin overview.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.build_sample_db">
+<code class="descclassname">app.</code><code class="descname">build_sample_db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.build_sample_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>creates a sample database for bootstraping or testing.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.craft_apn_payload">
+<code class="descclassname">app.</code><code class="descname">craft_apn_payload</code><span class="sig-paren">(</span><em>message</em>, <em>dev</em>, <em>pub=None</em><span class="sig-paren">)</span><a class="headerlink" href="#app.craft_apn_payload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a Apple Push Notification Payload to be sent later.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.devices">
+<code class="descclassname">app.</code><code class="descname">devices</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the registered devices view.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.feed">
+<code class="descclassname">app.</code><code class="descname">feed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.feed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the feed delievered to clients.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.login">
+<code class="descclassname">app.</code><code class="descname">login</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the admin login pages.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.login_required">
+<code class="descclassname">app.</code><code class="descname">login_required</code><span class="sig-paren">(</span><em>test</em><span class="sig-paren">)</span><a class="headerlink" href="#app.login_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>Login decorator for web administration.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.logout">
+<code class="descclassname">app.</code><code class="descname">logout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.logout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs out the user.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.new_pub">
+<code class="descclassname">app.</code><code class="descname">new_pub</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.new_pub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the new publication page.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.pubs">
+<code class="descclassname">app.</code><code class="descname">pubs</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#app.pubs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates publication overview page.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.register">
+<code class="descclassname">app.</code><code class="descname">register</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows a device to register itself to the server.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.report">
+<code class="descclassname">app.</code><code class="descname">report</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#app.report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes screenshot reports of devices.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.send_apn">
+<code class="descclassname">app.</code><code class="descname">send_apn</code><span class="sig-paren">(</span><em>message</em>, <em>dev</em>, <em>pub=None</em><span class="sig-paren">)</span><a class="headerlink" href="#app.send_apn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends an Apple Push Notification to a given registered device.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="app.send_multi_apn">
+<code class="descclassname">app.</code><code class="descname">send_multi_apn</code><span class="sig-paren">(</span><em>message</em>, <em>devs</em>, <em>pub=None</em><span class="sig-paren">)</span><a class="headerlink" href="#app.send_multi_apn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a bunch of Apple Push Notifications to given registered devices.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to SimpleReaderServer&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Jonas Höchst.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
