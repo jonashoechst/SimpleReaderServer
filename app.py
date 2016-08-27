@@ -37,6 +37,7 @@ apns = APNs(use_sandbox=app.config["APS_SANDBOX"], cert_file=cert_file, key_file
    
 # model definitions
 class Device(db.Model):
+    """ Database Model for a registered user device."""
     uid = db.Column(db.Text(36), primary_key=True)
     email = db.Column(db.Text(120))
     name = db.Column(db.Text(64))
@@ -49,6 +50,7 @@ class Device(db.Model):
         return self.uid+"("+self.name+")"
     
     def isAllowed(self):
+        """ simple check, wether the device is allowed to update the feed. """
         if self.status == "green" or self.status == "yellow":
             return True
         if app.config["NEW_DEV_IS_ALLOWED"] and self.status == "new":
@@ -56,6 +58,7 @@ class Device(db.Model):
         return False
         
 class Publication(db.Model):
+    """ Database Model for created publications."""
     uid = db.Column(db.String(120), primary_key=True)
     title = db.Column(db.Text(120))
     shortDescription = db.Column(db.Text(2000))
@@ -66,10 +69,12 @@ class Publication(db.Model):
     category = db.Column(db.Text(25))
     
     def getDict(self):
+        """ Returns all public variables of the publication."""
         return dict((key, value) for (key, value) in vars(self).iteritems() if key[0] != "_")
         # return {key: value for (key, value) in vars(self).iteritems() if key[0] != "_"}
     
     def generateUid(self):
+        """ Generates an identifier for a new publication, based on the name and a running number."""
         if self.uid != None:
             return self.uid
             
@@ -90,6 +95,7 @@ class Publication(db.Model):
         return "Publication: "+self.uid+"("+self.title+")"
     
 class Admin(db.Model):
+    """ Database Model for administrator accounts."""
     name = db.Column(db.Text(64))
     email = db.Column(db.Text(120), primary_key=True)
     pw_digest = db.Column(db.Text(64))
@@ -98,11 +104,13 @@ class Admin(db.Model):
         return check_password_hash(self.pw_digest, password)
 
 class Screenshot(db.Model):
+    """ Database model for screenshot entries. """
     gen_id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.Text(36), db.ForeignKey('device.uid'))
     timestamp = db.Column(db.String(25))
 
 def build_sample_db():
+    """ creates a sample database for bootstraping or testing."""
     # db.drop_all()
     db.create_all()
     db.session.begin()
@@ -116,6 +124,7 @@ def build_sample_db():
     db.session.commit()
 
 def send_apn(message, dev, pub=None):
+    """ Sends an Apple Push Notification to a given registered device."""
     payload = craft_apn_payload(message, dev, pub=pub)
     if not payload:
         return False
@@ -123,6 +132,7 @@ def send_apn(message, dev, pub=None):
     return True
     
 def send_multi_apn(message, devs, pub=None):
+    """ Sends a bunch of Apple Push Notifications to given registered devices."""
     frame = Frame()
     identifier = 1
     expiry = time.time()+(60*60*24) # 1 day expire time
@@ -142,6 +152,7 @@ def send_multi_apn(message, devs, pub=None):
     return (send, unsend)
 
 def craft_apn_payload(message, dev, pub=None):
+    """ Creates a Apple Push Notification Payload to be sent later."""
     # check if valid token is registered
     if len(dev.apns_token) != 64:
         return None
@@ -153,6 +164,7 @@ def craft_apn_payload(message, dev, pub=None):
 #
 # Login decorator
 def login_required(test):
+    """ Login decorator for web administration."""
     @wraps(test)
     def wrap(*args, **kwargs):
         if "logged_in" in session:
@@ -173,6 +185,7 @@ def home():
 # Admin Login
 @app.route("/admin/login", methods=["GET", "POST"])
 def login():
+    """ Creates the admin login pages."""
     if request.method == "POST":
         admin = Admin.query.filter_by(email=request.form["email"]).first()
         if admin == None:
@@ -196,6 +209,7 @@ def login():
 # Admin Logout
 @app.route("/admin/logout")
 def logout():
+    """ Logs out the user. """
     session.pop("logged_in", None)
     return redirect (url_for("home"))
               
@@ -204,6 +218,7 @@ def logout():
 @app.route("/admin/devices", methods=["GET", "POST"])
 @login_required
 def devices():
+    """ Creates the registered devices view."""
     if request.method == "GET":
         return render_template("devices.html", devices=Device.query.all())
     else:
@@ -321,6 +336,7 @@ def edit_admin(email):
 @app.route("/admin/pubs", methods=["GET", "POST"])
 @login_required
 def pubs():
+    """ Creates publication overview page."""
     if request.method == "GET":
         return render_template("pubs.html", pubs=Publication.query.order_by(Publication.releaseDate.desc()).all())
     else:
@@ -378,6 +394,7 @@ def edit_pub(pub_uid):
 @app.route("/admin/new_pub", methods=["GET", "POST"])
 @login_required
 def new_pub():
+    """ Creates the new publication page."""
     if request.method == "GET":
         return render_template("new_pub.html")
     else:
@@ -422,6 +439,7 @@ def new_pub():
 # API Feed Method
 @app.route("/api/feed", methods=["POST"])
 def feed():
+    """ Creates the feed delievered to clients. """
     pubs = Publication.query.order_by(Publication.releaseDate.desc()).all()
     cleaned_pubs = [pub.getDict() for pub in pubs]
     if request.method == "GET":
@@ -446,6 +464,7 @@ def feed():
 # API Register Method
 @app.route("/api/register", methods=["POST"])
 def register():
+    """ Allows a device to register itself to the server. """
     device = Device.query.filter_by(uid=request.form["uid"]).first()
     if device == None:
         device = Device()
@@ -467,6 +486,7 @@ def register():
     
 @app.route("/api/report", methods=["POST"])
 def report():
+    """ Takes screenshot reports of devices. """
     db.session.begin()
     screenshot = Screenshot()
     screenshot.uid = request.form["uid"]
