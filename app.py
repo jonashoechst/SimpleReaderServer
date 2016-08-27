@@ -278,6 +278,7 @@ def devices():
 @app.route("/admin/admins", methods=["GET", "POST"])
 @login_required
 def admins():
+    """ Creates the admin overview. """
     if request.method == "GET":
         return render_template("admins.html", admins=Admin.query.all())
     else:
